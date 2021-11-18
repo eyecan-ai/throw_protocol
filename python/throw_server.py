@@ -1,6 +1,3 @@
-import random
-import cv2
-import numpy as np
 import throw
 
 socket = throw.ThrowServer.create_accepting_socket("0.0.0.0", 8000)
