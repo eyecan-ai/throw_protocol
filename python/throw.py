@@ -186,11 +186,11 @@ class ThrowServer(object):
         """
         self.connection = connection
         self.client_address = client_address
+        self.data_callback = data_callback
         self.thread = threading.Thread(target=self.run)
         ThrowServer.ACTIVE_THREADS.append(self.thread)
         if auto_start:
             self.thread.start()
-        self.data_callback = data_callback
 
     def start(self):
         """Start main thread"""
@@ -369,7 +369,18 @@ class ThrowClient(object):
         self.connection = self._socket
         logger.debug(f"Client Connected to: {host}:{port}")
 
-    def send_message(self, command: str, tensor: Optional[np.ndarray] = None):
+    def send_message(
+        self, command: str, tensor: Optional[np.ndarray] = None
+    ) -> Tuple[str, Optional[np.ndarray]]:
+        """Send message to server and receive response if any
+
+        :param command: textual command
+        :type command: str
+        :param tensor: tensor to send , defaults to None
+        :type tensor: Optional[np.ndarray], optional
+        :return: received command and tensor if any
+        :rtype: Tuple[str, Optional[np.ndarray]]
+        """
 
         logger.debug(f"Sending message ({command})")
 
@@ -394,11 +405,11 @@ class ThrowClient(object):
         if header.payload_size > 0:
 
             # Receive Payload
-            received_data = self.receive_data_from_connection(
+            received_data = ThrowServer.receive_data_from_connection(
                 self.connection, header.payload_size
             )
 
             # Payload to Tensor
-            tensor = self.data_to_tensor(header, received_data)
+            tensor = ThrowServer.data_to_tensor(header, received_data)
 
         return header, tensor
