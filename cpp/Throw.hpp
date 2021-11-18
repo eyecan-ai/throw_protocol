@@ -124,6 +124,15 @@ public:
     }
 
     /**
+     * Receives an HEADER through the socket
+     */
+    void receiveHeader(MessageHeader &header)
+    {
+        if (recv(sock, &header, sizeof(MessageHeader), 0) != sizeof(MessageHeader))
+            die("Receive Data Fails!");
+    }
+    
+    /**
      * Sends an opencv IMAGE through the socket
      */
     std::shared_ptr<float> sendAndReceiveData(float* array, int height, int width, int depth, int bytesPerElement, std::string command)
@@ -158,35 +167,9 @@ public:
         return response_array;
     }
 
-    /**
-     * Receives an HEADER through the socket
-     */
-    void receiveHeader(MessageHeader &header)
-    {
-        if (recv(sock, &header, sizeof(MessageHeader), 0) != sizeof(MessageHeader))
-            die("Receive Data Fails!");
-    }
+    
 
     
-    /**
-     * Receives a float array through the socket
-     */
-    void receiveDataFloat(MessageHeader header, float **output)
-    {   
-        int expected_size = header.getPayloadSize();
-        *output = new float[expected_size];
-        int received_size = 0;
-        while (received_size < expected_size)
-        {
-            int remains = expected_size - received_size;
-            int chunk_size = recv(sock, &(*output)[received_size], remains, 0);
-            received_size += chunk_size;
-        }
-        std::cout << "Received: " << received_size << std::endl;
-        
-    }
-
-
     /**
      * DIEs
      */
