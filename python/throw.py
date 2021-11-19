@@ -64,6 +64,8 @@ class DataManipulator(object):
             tensor = np.frombuffer(buffer, dtype=np.uint16)
         elif bytes_per_element == 4:
             tensor = np.frombuffer(buffer, dtype=np.float32)
+        elif bytes_per_element == 8:
+            tensor = np.frombuffer(buffer, dtype=np.float64)
         else:
             raise ValueError("Invalid bytes per element")
 
