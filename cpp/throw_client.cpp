@@ -34,6 +34,12 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  int times = 100000000;
+  if (argc>3)
+  {
+    times = atoi(argv[3]);
+  }
+
   throwprotocol::ThrowClientExample client(argv[1], atoi(argv[2]));
 
   
@@ -44,9 +50,9 @@ int main(int argc, char *argv[])
       0.0, 0.0, 0.0, 1.0
   };
 
-  while (true)
+
+  for (; times > 0; times--)
   {
-    
     
     int height = 4;
     int width = 4;
