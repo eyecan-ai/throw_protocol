@@ -10,8 +10,9 @@ using System.Threading;
 using UnityEngine;
 using System.Runtime.InteropServices;
 
-public class ThrowClientExample : MonoBehaviour
+public class ThrowProtocolManager : MonoBehaviour
 {
+
 
     /**
     * The Header struct is a fixed size struct that is sent before every message.
@@ -94,6 +95,8 @@ public class ThrowClientExample : MonoBehaviour
 
         public Message()
         {
+            data = new T[0];
+            header = new Header(0, 0, 0, 1, "void");
         }
 
         public Message(Header header, T[] data)
@@ -105,6 +108,19 @@ public class ThrowClientExample : MonoBehaviour
         public Header header;
         public T[] data;
     }
+
+    /**
+    * The MessageCallbackWithResponse is a callback function that is called when a message is received.
+    * it produces also a response message.
+    */
+    public delegate Message<T> MessageCallbackWithResponse<T>(Message<T> message);
+
+    /**
+    * The MessageCallback is a callback function that is called when a message is received.
+    * it produces no response message.  
+    */
+    public delegate void MessageCallback<T>(Message<T> message);
+
 
     /**
     * The ThrowNode class is responsible for sending and receiving messages.
@@ -198,7 +214,7 @@ public class ThrowClientExample : MonoBehaviour
         {
             byte[] raw_data = receivePayloadBytes(header);
             T[] data = new T[header.width * header.height * header.depth];
-            if (header.byte_per_element == Marshal.SizeOf(data[0]))
+            if (header.byte_per_element == Marshal.SizeOf(typeof(T)))
             {
                 Buffer.BlockCopy(raw_data, 0, data, 0, raw_data.Length);
             }
@@ -219,11 +235,19 @@ public class ThrowClientExample : MonoBehaviour
         }
 
         /**
+        * send a Message to the server
+        */
+        public void sendMessage<T>(Message<T> message)
+        {
+            sendData<T>(message.data, message.header);
+        }
+
+        /**
         * sends numerica data array to the server given the Header
         */
         public void sendPayloadData<T>(T[] data, Header header)
         {
-            byte[] raw_data = new byte[data.Length * Marshal.SizeOf(data[0])];
+            byte[] raw_data = new byte[data.Length * Marshal.SizeOf(typeof(T))];
             Buffer.BlockCopy(data, 0, raw_data, 0, raw_data.Length);
             sendBytes(raw_data);
         }
@@ -243,18 +267,33 @@ public class ThrowClientExample : MonoBehaviour
         */
         public void sendData<T>(T[] data, int height, int width, int depth, String command)
         {
-            Header header = new Header(height, width, depth, Marshal.SizeOf(data[0]), command);
+            Header header = new Header(height, width, depth, Marshal.SizeOf(typeof(T)), command);
             sendData(data, header);
         }
 
+
     }
 
+
+
+
+    /**
+    * Attributes
+    */
+    public string address = "0.0.0.0";
+    public int port = 8000;
     private Thread serverThread;
     private Thread connectionThread;
     private bool connected = false;
     float[] shared_data;
     protected Matrix4x4 T = Matrix4x4.identity;
-    private System.Object threadLocker = new System.Object();
+
+
+    /**
+    * Static callbacks handlers
+    */
+    public List<MessageCallback<float>> passive_callbacks = new List<MessageCallback<float>>();
+    public MessageCallbackWithResponse<float> active_callback = null;
 
     /**
     * Starts an AcceptLoop thread to listen for incoming connections.
@@ -262,7 +301,8 @@ public class ThrowClientExample : MonoBehaviour
     void Start()
     {
 
-        T = RightHandCoordinateSystem.getLocalToWorldTransform(transform);
+        // T = RightHandCoordinateSystem.getLocalToWorldTransform(transform);
+        // active_callback = handleNewMessage;
 
         try
         {
@@ -296,7 +336,7 @@ public class ThrowClientExample : MonoBehaviour
     */
     void AcceptLoop()
     {
-        TcpListener server = new TcpListener(IPAddress.Parse("0.0.0.0"), 8000);
+        TcpListener server = new TcpListener(IPAddress.Parse(address), port);
         server.Start();
 
 
@@ -331,20 +371,24 @@ public class ThrowClientExample : MonoBehaviour
         {
             try
             {
+                // Receive message
                 Message<float> message = client.receiveMessage<float>();
-                lock (threadLocker)
+
+                // Produce Response message if active callback is set
+                Message<float> response_message = new Message<float>();
+                if (active_callback != null)
                 {
-                    Matrix4x4 matrix = new Matrix4x4();
-                    for (int i = 0; i < 4; i++)
-                    {
-                        for (int j = 0; j < 4; j++)
-                        {
-                            matrix[i, j] = message.data[i * 4 + j];
-                        }
-                    }
-                    T = matrix;
+                    response_message = active_callback(message);
                 }
-                client.sendData(message.data, message.header);
+
+                // Propagate message to all passive callbacks
+                foreach (MessageCallback<float> callback in passive_callbacks)
+                {
+                    callback(message);
+                }
+
+                // Send response message
+                client.sendData(response_message.data, response_message.header);
             }
             catch (Exception e)
             {
@@ -354,7 +398,6 @@ public class ThrowClientExample : MonoBehaviour
             }
         }
     }
-
 
     public class RightHandCoordinateSystem
     {
@@ -387,12 +430,39 @@ public class ThrowClientExample : MonoBehaviour
         }
     }
 
+
+
     void Update()
     {
-        lock (threadLocker)
-        {
-            Debug.Log("Setting: " + T);
-            RightHandCoordinateSystem.setLocalToWorldTransform(transform, T);
-        }
+        // lock (threadLocker)
+        // {
+        //     Debug.Log("Setting: " + T);
+        //     RightHandCoordinateSystem.setLocalToWorldTransform(transform, T);
+        // }
     }
+
+    // /**
+    // //  ____    ___   _   _    ____   _       _____   _____    ___    _   _ 
+    // // / ___|  |_ _| | \ | |  / ___| | |     | ____| |_   _|  / _ \  | \ | |
+    // // \___ \   | |  |  \| | | |  _  | |     |  _|     | |   | | | | |  \| |
+    // //  ___) |  | |  | |\  | | |_| | | |___  | |___    | |   | |_| | | |\  |
+    // // |____/  |___| |_| \_|  \____| |_____| |_____|   |_|    \___/  |_| \_|
+    // */
+    // private static ThrowProtocolManager _instance;
+    // public static ThrowProtocolManager Instance { get { return _instance; } }
+
+    // /**
+    // * Awake object
+    // */
+    // private void Awake()
+    // {
+    //     if (_instance != null && _instance != this)
+    //     {
+    //         Destroy(this.gameObject);
+    //     }
+    //     else
+    //     {
+    //         _instance = this;
+    //     }
+    // }
 }

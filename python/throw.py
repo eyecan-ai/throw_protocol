@@ -238,7 +238,7 @@ class ThrowServer(object):
         :return: converted tensor
         :rtype: np.ndarray
         """
-        if header.height == 1 and header.depth == 1 and header.depth > 0:
+        if header.height == 1 and header.width == 1 and header.depth > 0:
             tensor = DataManipulator.bytes_to_image(data)
         else:
             tensor = DataManipulator.bytes_to_tensor(
