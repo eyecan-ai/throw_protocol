@@ -164,6 +164,9 @@ class Header(object):
         """
         return struct.Struct(Header.HEADER_FORMAT)
 
+    def __repr__(self) -> str:
+        return f"Header('{self.command}',{self.height},{self.width},{self.depth},{self.byte_per_element})"
+
 
 class ThrowServer(object):
     ACTIVE_THREADS = []
@@ -235,7 +238,7 @@ class ThrowServer(object):
         :return: converted tensor
         :rtype: np.ndarray
         """
-        if header.height == 1:
+        if header.height == 1 and header.depth == 1 and header.depth > 0:
             tensor = DataManipulator.bytes_to_image(data)
         else:
             tensor = DataManipulator.bytes_to_tensor(
@@ -288,7 +291,7 @@ class ThrowServer(object):
             # Receive Header
             logger.debug("Waiting for Header ...")
             header = Header(self.connection.recv(Header.HEADER_SIZE))
-            logger.debug(f"Received: { header.command}")
+            logger.debug(f"Received: {str(header)}")
 
             tensor = None
             if header.payload_size > 0:
