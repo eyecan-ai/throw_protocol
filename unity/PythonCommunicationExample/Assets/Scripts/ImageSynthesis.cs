@@ -288,6 +288,10 @@ public class ImageSynthesis : MonoBehaviour
             {
                 current_depth_data = bytes;
             }
+            else if (string.Compare(pass.name, "_img") == 0)
+            {
+                current_image_data = bytes;
+            }
         }
 
         // restore state and cleanup
@@ -303,7 +307,18 @@ public class ImageSynthesis : MonoBehaviour
         ThrowEndpointByte.Message<byte> response_message = new ThrowEndpointByte.Message<byte>();
         lock (locker)
         {
-            response_message.data = current_depth_data;
+            if (message.header.command.Trim().CompareTo("depth") == 0)
+            {
+                response_message.data = current_depth_data;
+            }
+            else if (message.header.command.Trim().CompareTo("rgb") == 0)
+            {
+                response_message.data = current_image_data;
+            }
+            else
+            {
+                //
+            }
         }
         response_message.header = new ThrowEndpoint<byte>.Header(1, 1, response_message.data.Length, 1, "image");
         return response_message;
