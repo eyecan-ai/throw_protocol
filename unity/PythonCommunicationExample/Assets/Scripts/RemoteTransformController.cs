@@ -5,7 +5,7 @@ using UnityEngine;
 public class RemoteTransformController : MonoBehaviour
 {
 
-    public ThrowProtocolManager throwProtocolManager;
+    public ThrowEndpointFloat throwProtocolManager;
     private Matrix4x4 new_matrix;
     private System.Object locker = new System.Object();
     public bool relative = true;
@@ -13,7 +13,7 @@ public class RemoteTransformController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        new_matrix = ThrowProtocolManager.RightHandCoordinateSystem.getLocalToWorldTransform(transform);
+        new_matrix = ThrowEndpointFloat.RightHandCoordinateSystem.getLocalToWorldTransform(transform);
         throwProtocolManager.passive_callbacks.Add(handleNewMessage);
     }
 
@@ -24,18 +24,18 @@ public class RemoteTransformController : MonoBehaviour
         {
             if (relative)
             {
-                Matrix4x4 current_matrix = ThrowProtocolManager.RightHandCoordinateSystem.getLocalToWorldTransform(transform);
+                Matrix4x4 current_matrix = ThrowEndpointFloat.RightHandCoordinateSystem.getLocalToWorldTransform(transform);
                 current_matrix = current_matrix * new_matrix;
-                ThrowProtocolManager.RightHandCoordinateSystem.setLocalToWorldTransform(transform, current_matrix);
+                ThrowEndpointFloat.RightHandCoordinateSystem.setLocalToWorldTransform(transform, current_matrix);
             }
             else
             {
-                ThrowProtocolManager.RightHandCoordinateSystem.setLocalToWorldTransform(transform, new_matrix);
+                ThrowEndpointFloat.RightHandCoordinateSystem.setLocalToWorldTransform(transform, new_matrix);
             }
         }
     }
 
-    void handleNewMessage(ThrowProtocolManager.Message<float> message)
+    void handleNewMessage(ThrowEndpointFloat.Message<float> message)
     {
 
         Debug.Log("Received: " + message);

@@ -220,6 +220,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
+  captureWidth: 400
+  captureHeight: 400
 --- !u!1 &95959332
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,7 +688,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1909864542}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9104248fa499f4cb4a047fe427acc0fa, type: 3}
+  m_Script: {fileID: 11500000, guid: af54ca4727cf946adb0f26f596f9acde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   address: 0.0.0.0
