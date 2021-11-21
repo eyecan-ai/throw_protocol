@@ -12,3 +12,7 @@ Is a scene where python client control camera Pose with Throw.
 ### Scene: CameraStream
 
 Is a scene streaming camera images with Throw.
+
+### Scene: PIDCOntroller
+
+Is a scene with Python PID controller moving Unity3D dynamics.
