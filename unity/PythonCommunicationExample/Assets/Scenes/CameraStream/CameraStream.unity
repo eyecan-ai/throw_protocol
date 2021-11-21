@@ -273,6 +273,7 @@ GameObject:
   - component: {fileID: 875127434}
   - component: {fileID: 875127433}
   - component: {fileID: 875127436}
+  - component: {fileID: 875127437}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -311,8 +312,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
+  near clip plane: 0.5
+  far clip plane: 20
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -352,7 +353,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 875127432}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e10cdc0e3270e452d89c3586376fa920, type: 3}
   m_Name: 
@@ -360,6 +361,28 @@ MonoBehaviour:
   manager: {fileID: 69481344}
   captureWidth: 400
   captureHeight: 400
+--- !u!114 &875127437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 875127432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a227d1101b114c35b3e7f8524c9ade6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rgb: 1
+  semantic: 0
+  instances: 0
+  depth: 1
+  normals: 0
+  flow: 0
+  manager: {fileID: 69481344}
+  uberReplacementShader: {fileID: 4800000, guid: 4386cae7e8fdc436d8cf6070f0d5bcdd, type: 3}
+  opticalFlowShader: {fileID: 4800000, guid: 9ea2aab26a5884d789c4f76446375b4b, type: 3}
+  opticalFlowSensitivity: 1
 --- !u!1 &1183756732
 GameObject:
   m_ObjectHideFlags: 0

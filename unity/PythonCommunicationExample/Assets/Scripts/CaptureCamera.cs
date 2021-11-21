@@ -8,6 +8,8 @@ public class CaptureCamera : MonoBehaviour
     public ThrowEndpointByte manager;
     private System.Object locker = new System.Object();
     byte[] current_image_data;
+    byte[] current_depth_data;
+
 
     public int captureWidth = 400;
     public int captureHeight = 400;
@@ -23,8 +25,10 @@ public class CaptureCamera : MonoBehaviour
     {
         lock (locker)
         {
+            current_depth_data = this.CaptureDepth();
             current_image_data = this.Capture();
         }
+
     }
 
     public byte[] Capture()
@@ -64,6 +68,35 @@ public class CaptureCamera : MonoBehaviour
         return imageBytes;
     }
 
+
+    byte[] CaptureDepth()
+    {
+
+        Rect rect = new Rect(0, 0, captureWidth, captureHeight);
+        Texture2D depthScreenShot = new Texture2D(captureWidth, captureHeight, TextureFormat.ARGB32, false);
+        // RenderTexture renderTexture = new RenderTexture(captureWidth, captureHeight, 0);
+        RenderTexture depthTexture = new RenderTexture(captureWidth, captureHeight, 24, RenderTextureFormat.Depth);
+
+        RenderTexture.active = depthTexture;
+        Camera camera = GetComponent<Camera>();
+        camera.depthTextureMode = DepthTextureMode.Depth;
+        camera.SetTargetBuffers(depthTexture.colorBuffer, depthTexture.depthBuffer);
+        camera.targetTexture = depthTexture;
+        camera.Render();
+
+        // RenderTexture.active = depthTexture;
+        depthScreenShot.ReadPixels(rect, 0, 0);
+        depthScreenShot.Apply();
+
+        // //Encode the texture data into .png formatted bytes
+        // byte[] data = depthScreenShot.EncodeToPNG();
+        // Debug.Log("Depth size: " + data.Length);
+        // camera.targetTexture = null;
+        // RenderTexture.active = null;
+        // Destroy(depthScreenShot);
+        return new byte[0];
+    }
+
     ThrowEndpointByte.Message<byte> handleNewMessage(ThrowEndpointByte.Message<byte> message)
     {
 
@@ -71,7 +104,7 @@ public class CaptureCamera : MonoBehaviour
 
         lock (locker)
         {
-            response_message.data = current_image_data;
+            response_message.data = current_depth_data;
         }
         response_message.header = new ThrowEndpoint<byte>.Header(1, 1, response_message.data.Length, 1, "image");
         return response_message;
