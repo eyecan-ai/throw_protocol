@@ -33,7 +33,7 @@ public class CameraCaptureSystem : MonoBehaviour
     // Buffers
     private System.Object locker = new System.Object();
     private Dictionary<string, byte[]> data_map = new Dictionary<string, byte[]>();
-    private Dictionary<string, Texture2D> data_map2 = new Dictionary<string, Texture2D>();
+    // private Dictionary<string, Texture2D> data_map2 = new Dictionary<string, Texture2D>();
     byte[] current_image_data;
     byte[] current_depth_data;
 
@@ -112,13 +112,16 @@ public class CameraCaptureSystem : MonoBehaviour
 
 
     public float deltaTime;
-    public Text fpsText;
+    public Text fpsText = null;
 
     void Update()
     {
-        deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
-        float fps = 1.0f / deltaTime;
-        fpsText.text = Mathf.Ceil(fps).ToString();
+        if (fpsText != null)
+        {
+            deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+            float fps = 1.0f / deltaTime;
+            fpsText.text = Mathf.Ceil(fps).ToString();
+        }
         StartBuffering(output_width, output_height);
     }
 
